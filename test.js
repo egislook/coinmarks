@@ -1,0 +1,1 @@
+require('./index.js')(-5).then(console.log);

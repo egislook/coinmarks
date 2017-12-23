@@ -1,0 +1,30 @@
+{
+  "name": "coinmarks",
+  "version": "0.0.1",
+  "description": "scraped coinmarketcap of top 100",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --ignore /public -e html,js index.js",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "scraping",
+    "coinmarketcap",
+    "cheerio",
+    "node"
+  ],
+  "author": "noneedsystem",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "node-fetch": "^1.7.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.13.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": " https://github.com/noneedsystem/coinmarks.git"
+  }
+ 
+}
