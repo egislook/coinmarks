@@ -1,6 +1,6 @@
 {
   "name": "coinmarks",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "scraped coinmarketcap of top 100",
   "main": "index.js",
   "scripts": {
@@ -26,5 +26,4 @@
     "type": "git",
     "url": " https://github.com/noneedsystem/coinmarks.git"
   }
- 
 }
