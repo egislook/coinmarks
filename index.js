@@ -4,7 +4,8 @@ const cheerio   = require('cheerio');
 const URL = 'https://coinmarketcap.com';
 const SELECTOR_COINS    = 'table#currencies tbody tr';
 const SELECTOR_MARKETS  = '#markets-table tbody tr';
-const SELECTOR_EXCHANGE = 'div#markets table tbody tr'
+const SELECTOR_EXCHANGE = 'div#markets table tbody tr';
+const SELECTOR_ALLCOINS = 'table#currencies-all tbody tr';
 
 const coinMarks = (slc = -1) => 
   fetch(URL)
@@ -40,6 +41,13 @@ module.exports.exchange = (exchangeLink) =>
         .then($ => scrapSingle($, coin))
     })))
     
+module.exports.all = () => 
+  fetch(URL + '/all/views/all/')
+    .then(res => res.text())
+    .then(html => cheerio.load(html))
+    .then($ => $(SELECTOR_ALLCOINS).map((i, el) => scrapSingleFromAll($(el))).get())
+    .then(coins => coins.slice(0, 2))
+    
     
   function scrapCoin(el){
     
@@ -64,6 +72,20 @@ module.exports.exchange = (exchangeLink) =>
         usd: elems.price.attr('data-usd'),
         btc: elems.price.attr('data-btc')
       }
+    }
+  }
+  
+  function scrapSingleFromAll(el){
+    const elems = {
+      link: el.find('a.currency-name-container'),
+      supply: el.find('td.circulating-supply a'),
+      symbol: el.find('td.col-symbol'),
+    };
+    
+    return {
+      name: elems.link.text(),
+      supply: parseInt(elems.supply.attr('data-supply')),
+      symbol: elems.symbol.text()
     }
   }
   
