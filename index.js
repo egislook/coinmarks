@@ -7,6 +7,7 @@ const SELECTOR_MARKETS  = '#markets-table tbody tr';
 const SELECTOR_HISTORY  = 'div#historical-data table tbody tr'
 const SELECTOR_EXCHANGE = 'div#markets table tbody tr';
 const SELECTOR_ALLCOINS = 'table#currencies-all tbody tr';
+const SELECTOR_RECENT   = 'table#trending-recently-added tbody tr';
 
 const coinMarks = (slc = -1) => 
   fetch(URL)
@@ -55,6 +56,12 @@ module.exports.all = (slc = 0) =>
     .then($ => $(SELECTOR_ALLCOINS).map((i, el) => scrapSingleFromAll($(el))).get())
     .then(coins => coins.slice(slc))
     
+module.exports.recent = () =>
+  fetch(URL + '/new/')
+    .then(res => res.text())
+    .then(html => cheerio.load(html))
+    .then($ => $(SELECTOR_RECENT).map((i, el) => scrapRecent($(el))).get())
+    
     
   function scrapCoin(el){
     
@@ -82,6 +89,25 @@ module.exports.all = (slc = 0) =>
     }
   }
   
+  function scrapRecent(el){
+    const elems = {
+      link: el.find('td.currency-name a'),
+      img: el.find('td.currency-name img'),
+      symbol: el.find('td').eq(1),
+      listed: el.find('td').eq(2),
+      supply: el.find('td.circulating-supply')
+    };
+    
+    return {
+      name:   elems.img.attr('alt'),
+      supply: elems.supply.attr('data-supply'),
+      listed: daysAgoToTimestamp(elems.listed.text()),
+      symbol: elems.symbol.text(),
+      link:   elems.link.attr('href'),
+      id:     elems.link.attr('href').split('/').filter(v => v.length).pop(),
+    }
+  }
+  
   function scrapSingleFromAll(el){
     const elems = {
       link:   el.find('a.currency-name-container'),
@@ -93,7 +119,8 @@ module.exports.all = (slc = 0) =>
       name:   elems.link.text(),
       supply: parseInt(Number(elems.supply.attr('data-supply'))),
       symbol: elems.symbol.text(),
-      link:   elems.link.attr('href')
+      link:   elems.link.attr('href'),
+      id:     elems.link.attr('href').split('/').filter(v => v.length).pop()
     }
   }
   
@@ -221,4 +248,12 @@ module.exports.all = (slc = 0) =>
     
     
     return arr.join('');
+  }
+  
+  function daysAgoToTimestamp(ago){
+    ago = ago.toLocaleLowerCase();
+    if(ago === 'today')
+      return new Date().getTime();
+      
+    return new Date().setDate(new Date().getDate() - parseInt(ago));
   }
