@@ -1,6 +1,6 @@
 {
   "name": "coinmarks",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "scraped coinmarketcap of top 100",
   "main": "index.js",
   "scripts": {
