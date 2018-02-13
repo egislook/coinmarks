@@ -56,11 +56,27 @@ module.exports.all = (slc = 0) =>
     .then($ => $(SELECTOR_ALLCOINS).map((i, el) => scrapSingleFromAll($(el))).get())
     .then(coins => coins.slice(slc))
     
-module.exports.recent = () =>
+let recent = module.exports.recent = () =>
   fetch(URL + '/new/')
     .then(res => res.text())
     .then(html => cheerio.load(html))
     .then($ => $(SELECTOR_RECENT).map((i, el) => scrapRecent($(el))).get())
+    
+let latest = module.exports.latest = () =>
+  fetch('https://api.coinmarketcap.com/v1/ticker/?limit=9999')
+    .then(res => res.json())
+    
+let singleLatest = module.exports.singleLatest = (id) =>
+  fetch('https://api.coinmarketcap.com/v1/ticker/' + id)
+    .then(res => res.json())
+    
+module.exports.singeGraph = (coinId) =>
+  fetch('https://graphs2.coinmarketcap.com/currencies/' + coinId)
+    .then(res => res.json())
+    
+module.exports.current = () =>
+  Promise.all( [ recent(), latest() ] )
+    .then( ([recent, latest]) => latest.map(coin => Object.assign(coin, recent.find(c => c.id === coin.id))))
     
     
   function scrapCoin(el){
@@ -150,7 +166,7 @@ module.exports.recent = () =>
         //btc: elems.price.attr('data-btc')
       },
       web: elems.web && elems.web.attr('href')
-    }, history)
+    }, history);
   }
   
   function scrapHistory(el){
@@ -199,8 +215,10 @@ module.exports.recent = () =>
   function scrapExtras($, coin, history = false){
     if(!history)
       coin.markets = $(SELECTOR_MARKETS).map((i, el) => scrapMarket($(el))).get();
-    else
+    else{
       coin.history = $(SELECTOR_HISTORY).map((i, el) => scrapHistory($(el))).get();
+      coin.listed  = coin.history && coin.history.slice().pop().date;
+    }
     return coin;
   }
   
